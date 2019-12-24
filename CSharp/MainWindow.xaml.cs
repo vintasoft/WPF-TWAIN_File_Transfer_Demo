@@ -121,7 +121,7 @@ namespace WpfTwainFileTransferDemo
             catch (Exception ex)
             {
                 // show dialog with error message
-                MessageBox.Show(ex.Message, "TWAIN device manager", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(GetFullExceptionMessage(ex), "TWAIN device manager", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
 
@@ -132,8 +132,17 @@ namespace WpfTwainFileTransferDemo
                     return false;
             }
 
-            // open the device manager
-            _deviceManager.Open();
+            try
+            {
+                // open the device manager
+                _deviceManager.Open();
+            }
+            catch (Exception ex)
+            {
+                // show dialog with error message
+                MessageBox.Show(GetFullExceptionMessage(ex), "TWAIN device manager", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
 
             // if no devices are found in the system
             if (_deviceManager.Devices.Count == 0)
@@ -174,7 +183,7 @@ namespace WpfTwainFileTransferDemo
                     catch (TwainDeviceManagerException ex)
                     {
                         // show dialog with error message
-                        MessageBox.Show(ex.Message, "TWAIN device manager", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(GetFullExceptionMessage(ex), "TWAIN device manager", MessageBoxButton.OK, MessageBoxImage.Error);
 
                         return false;
                     }
@@ -245,7 +254,7 @@ namespace WpfTwainFileTransferDemo
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                MessageBox.Show(GetFullExceptionMessage(ex));
             }
             finally
             {
@@ -323,7 +332,7 @@ namespace WpfTwainFileTransferDemo
             {
                 // close the device
                 _currentDevice.Close();
-                MessageBox.Show(ex.Message);
+                MessageBox.Show(GetFullExceptionMessage(ex));
                 SetWindowUiState(true);
                 return;
             }
@@ -452,6 +461,25 @@ namespace WpfTwainFileTransferDemo
             catch
             {
             }
+        }
+
+        /// <summary>
+        /// Returns the message of exception and inner exceptions.
+        /// </summary>
+        private string GetFullExceptionMessage(System.Exception ex)
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            sb.AppendLine(ex.Message);
+
+            System.Exception innerException = ex.InnerException;
+            while (innerException != null)
+            {
+                if (ex.Message != innerException.Message)
+                    sb.AppendLine(string.Format("Inner exception: {0}", innerException.Message));
+                innerException = innerException.InnerException;
+            }
+
+            return sb.ToString();
         }
 
         #endregion
